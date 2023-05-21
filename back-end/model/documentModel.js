@@ -13,12 +13,16 @@ const DocumentSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  image: {
+    type: String,
+    required: true,
+  },
   author: {
     type: String,
     required: true,
   },
-  publishYear: {
-    type: Number,
+  file: {
+    type: String,
     required: true,
   },
   description: {

@@ -1,5 +1,5 @@
 const res = require("express/lib/response");
-
+const path = require("path");
 const Document = require("../model/documentModel");
 
 // Get all documents
@@ -25,7 +25,8 @@ exports.createDocument = (req, res) => {
       documentCode: req.body.documentCode,
       name: req.body.name,
       author: req.body.author,
-      publishYear: req.body.publishYear,
+      image: req.body.image,
+      file: req.body.file.path,
       documentTypeId: req.body.documentTypeId,
       description: req.body.description,
       photo: req.body.photo,
@@ -92,4 +93,15 @@ exports.deleteDocument = (req, res) => {
         message: err || `Fail to delete document with id: ${id} !!!`,
       });
     });
+};
+
+const downloadFile = async (req, res) => {
+  const id = req.body.id;
+  const document = await Document.findById(id);
+  if (!document) {
+    console.log("No document found!");
+  }
+  const file = item.file;
+  const filePath = path.join(__dirname, `../${file}`);
+  res.download(filePath)
 };
