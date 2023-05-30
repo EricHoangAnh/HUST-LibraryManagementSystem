@@ -18,7 +18,7 @@ mongoose.connection.on("connected", () => {
   });
   // console.log(bucket);
 });
-console.log("Pinged your deployment. You successfully connected to MongoDB!");
+
 const storage = new GridFsStorage({
   url: uri,
   file: (req, file) => {
@@ -70,26 +70,6 @@ app.get("/fileinfo/:filename", async (req, res) => {
   } catch (error) {
     console.log(error);
   }
-  // try {
-  //   await bucket
-  //     .find({
-  //       filename: req.params.filename,
-  //     })
-  //     .toArray((err, files) => {
-  //       console.log("running");
-  //       if (!files || files.length === 0) {
-  //         console.log("... No file");
-  //         return res.status(404).json({
-  //           err: "no files exist",
-  //         });
-  //       }
-  //       console.log("..... Downloading");
-  //       bucket.openDownloadStreamByName(req.params.filename).pipe(res);
-  //     });
-  //   // console.log("Success!");
-  // } catch (err) {
-  //   console.log(err);
-  // }
 });
 app.post("/upload", upload.single("file"), (req, res) => {
   res.status(200).send("File uploaded successfully");
