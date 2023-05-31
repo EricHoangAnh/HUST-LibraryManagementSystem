@@ -10,4 +10,14 @@ export const RouteMap = {
     ),
     refresh: true,
   },
+  uploadDocument: {
+    pageValue: "upload-document",
+    pageName: "uploadDocument",
+    component: markRaw(
+      defineAsyncComponent(
+        () => import("../views/users/upload-document/UploadDocument.vue")
+      )
+    ),
+    refresh: true,
+  },
 };

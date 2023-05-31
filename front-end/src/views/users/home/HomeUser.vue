@@ -1,19 +1,21 @@
 <script setup lang="ts">
-import DocumentList from "../../../components/common/document-list/DocumentList.vue";
+import store from "@/store";
+import DocumentList from "../../../components/common/document/DocumentList.vue";
 import { RouteMap } from "../../../router/settingroute";
-const navBar = [
-  {
-    iconClass: "ms-Icon ms-Icon--CityNext",
-    title: "Tìm kiếm tài liệu",
-    pageName: RouteMap.search,
-  },
-];
+import LayoutHome from "@/components/common/layout/LayoutHomeUser.vue";
+import { computed } from "vue";
+
+const goToPage = (route: any) => {
+  store.commit("setSettingPageName", route);
+};
+const router = computed(() => store.getters["getCurrentRouter"]);
 </script>
 <template>
   <div class="home-user">
-    <layout></layout>
+    <layout-home @go-to-page="goToPage"></layout-home>
     <div class="container">
-      <document-list></document-list>
+      <!-- <document-list></document-list> -->
+      <component :is="router.component" ref="componentRef"></component>
     </div>
   </div>
   <footer></footer>
