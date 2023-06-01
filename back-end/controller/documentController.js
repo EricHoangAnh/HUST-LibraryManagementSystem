@@ -1,6 +1,35 @@
-const res = require("express/lib/response");
 const path = require("path");
+const fs = require("fs");
 const Document = require("../model/documentModel");
+const { getBucket } = require("../service/db");
+
+let isSameFile;
+const isSameCurrentFile = async (fileId, req, res) => {
+  const bucket = getBucket();
+  const currentFile = await bucket.find({ _id: fileId });
+  console.log(currentFile)
+  const filename = req.file.filename;
+  const chunkSize = req.file.chunkSize;
+  const size = req.file.size;
+  const contentType = req.file.contentType;
+  const checkSameFile = false;
+  if (
+    filename === currentFile.filename &&
+    chunkSize === currentFile.chunkSize &&
+    size === currentFile.size &&
+    contentType === currentFile.contentType
+  ) {
+    checkSameFile = true;
+  }
+  if (!checkSameFile) {
+    console.log("File khác nhau");
+    await bucket.delete(fileId);
+    isSameFile = false;
+  } else {
+    console.log("File giống nhau");
+    isSameFile = true;
+  }
+};
 
 // Get all documents
 exports.getAllDocuments = async (req, res) => {
@@ -15,45 +44,46 @@ exports.getAllDocuments = async (req, res) => {
 };
 
 // Add a new document
-exports.createDocument = (req, res) => {
+exports.createDocument = async (req, res) => {
   if (!req.body) {
     res.status(400).send({ message: "Request is empty !!!" });
     return;
   }
   try {
-    const document = new Document({
+    console.log(req.file);
+
+    // Tạo một bản ghi mới với thông tin document và fileId
+    const newDocument = new Document({
       documentCode: req.body.documentCode,
-      name: req.body.name,
-      author: req.body.author,
-      image: req.body.image,
-      file: req.body.file.path,
       documentTypeId: req.body.documentTypeId,
+      name: req.body.name,
+      image: req.body.image,
+      author: req.body.author,
+      file: req.file, // Lưu fileId vào trường "file"
       description: req.body.description,
       photo: req.body.photo,
     });
 
-    document
-      .save(document)
-      .then((data) => {
-        res.status(200).send(data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    await newDocument.save();
+
+    res.status(200).send("Tạo document và tải lên file thành công");
   } catch (err) {
     console.log(err);
   }
 };
 
 // Update a document
-exports.updateDocument = (req, res) => {
+exports.updateDocument = async (req, res) => {
   if (!req.body) {
     res.status(400).send({ message: "Request is empty !!!" });
     return;
   }
   const id = req.params.id;
+  const fileId = req.file.id;
   try {
-    Document.findByIdAndUpdate(id, req.body, { new: true }).then((data) => {
+    console.log(fileId)
+    await isSameCurrentFile(fileId, req, res);
+    Document.findByIdAndUpdate(id, {...req.body, file: req.file}, { new: true }).then((data) => {
       if (!data) {
         res.status(404).send({
           message: `Cannot find document with id ${id} !!!`,
@@ -94,6 +124,9 @@ exports.deleteDocument = (req, res) => {
       });
     });
 };
+exports.getIsSameFile = () => {
+  return isSameFile;
+};
 
 const downloadFile = async (req, res) => {
   const id = req.body.id;
@@ -103,5 +136,5 @@ const downloadFile = async (req, res) => {
   }
   const file = item.file;
   const filePath = path.join(__dirname, `../${file}`);
-  res.download(filePath)
+  res.download(filePath);
 };

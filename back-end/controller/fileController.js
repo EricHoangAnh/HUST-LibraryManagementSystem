@@ -1,20 +1,28 @@
-exports.uploadFile = async (req, res) => {
-    const filename = req.params.filename;
-    try {
-      const downloadStream = bucket.openDownloadStreamByName(filename);
-      const writeStream = fs.createWriteStream(`../${filename}`);
+const fs = require("fs");
+const { getBucket } = require("../service/db");
+// const multer = require("multer");
 
-      downloadStream.pipe(writeStream);
+exports.uploadFile = (req, res) => {
+  res.status(200).send("File uploaded successfully");
+};
+exports.downloadFile = async (req, res) => {
+  const bucket = getBucket()
+  const filename = req.params.filename;
+  try {
+    const downloadStream = bucket.openDownloadStreamByName(filename);
+    const writeStream = fs.createWriteStream(`C:/Users/ethan.ha/Downloads/${filename}`);
 
-      downloadStream.on("end", () => {
-        console.log("Tập tin đã được tải xuống thành công!");
-        res.status(200).send("Tập tin đã được tải xuống thành công!");
-      });
+    downloadStream.pipe(writeStream);
 
-      downloadStream.on("error", (error) => {
-        console.error("Lỗi khi tải xuống tập tin:", error);
-      });
-    } catch (error) {
-      console.log(error);
-    }
-}
+    downloadStream.on("end", () => {
+      console.log("Tập tin đã được tải xuống thành công!");
+      res.status(200).send("Tập tin đã được tải xuống thành công!");
+    });
+
+    downloadStream.on("error", (error) => {
+      console.error("Lỗi khi tải xuống tập tin:", error);
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};

@@ -6,7 +6,7 @@ const DocumentSchema = mongoose.Schema({
     required: true,
   },
   documentTypeId: {
-    type: Number,
+    type: String,
     required: true,
   },
   name: {
@@ -22,8 +22,8 @@ const DocumentSchema = mongoose.Schema({
     required: true,
   },
   file: {
-    type: String,
-    required: true,
+    type: Object,
+    required: false,
   },
   description: {
     type: String,
