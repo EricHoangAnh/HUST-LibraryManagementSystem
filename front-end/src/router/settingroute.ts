@@ -20,4 +20,14 @@ export const RouteMap = {
     ),
     refresh: true,
   },
+  documentForm: {
+    pageValue: "document-form",
+    pageName: "documentForm",
+    component: markRaw(
+      defineAsyncComponent(
+        () => import("../components/common/document/DocumentForm.vue")
+      )
+    ),
+    refresh: true,
+  },
 };

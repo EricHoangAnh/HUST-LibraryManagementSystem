@@ -54,7 +54,7 @@ const showMainPage = (route: any) => {
               </li>
             </ul>
           </li>
-          <li class="nav-item" @click="showMainPage(RouteMap.uploadDocument)">
+          <li class="nav-item" @click="showMainPage(RouteMap.documentForm)">
             <a class="nav-link">Đóng góp tài liệu</a>
           </li>
         </ul>
