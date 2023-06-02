@@ -50,7 +50,7 @@ exports.createDocument = async (req, res) => {
     return;
   }
   try {
-    console.log(req.file);
+    console.log(req.body.image);
 
     // Tạo một bản ghi mới với thông tin document và fileId
     const newDocument = new Document({
