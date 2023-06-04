@@ -9,6 +9,13 @@ const actions = {
       context.commit("setStudent", response);
     });
   },
+  getDocuments: (context: any) => {
+    const url = "document";
+    axiosClient.get(url).then((response) => {
+      //   console.log(response);
+      context.commit("setDocument", response);
+    });
+  },
 };
 
 export default actions;

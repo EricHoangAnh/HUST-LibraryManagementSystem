@@ -3,12 +3,20 @@ import store from "@/store";
 import DocumentList from "../../../components/common/document/DocumentList.vue";
 import { RouteMap } from "../../../router/settingroute";
 import LayoutHome from "@/components/common/layout/LayoutHomeUser.vue";
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 
 const goToPage = (route: any) => {
   store.commit("setSettingPageName", route);
 };
 const router = computed(() => store.getters["getCurrentRouter"]);
+
+const allDocument = computed(() => store.state.documents)
+const allStudents = computed(() => store.state.students)
+
+onMounted(async () => {
+await store.dispatch('getDocuments')
+await store.dispatch('getStudents')    
+})
 </script>
 <template>
   <div class="home-user">
