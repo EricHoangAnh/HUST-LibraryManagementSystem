@@ -49,17 +49,15 @@ exports.createDocument = async (req, res) => {
     res.status(400).send({ message: "Request is empty !!!" });
     return;
   }
+  console.log(req.file)
   try {
-    console.log(req.body.image);
-
     // Tạo một bản ghi mới với thông tin document và fileId
     const newDocument = new Document({
       documentCode: req.body.documentCode,
       documentTypeId: req.body.documentTypeId,
       name: req.body.name,
-      image: req.body.image,
       author: req.body.author,
-      file: req.file, // Lưu fileId vào trường "file"
+      file: req.file,
       description: req.body.description,
       photo: req.body.photo,
     });

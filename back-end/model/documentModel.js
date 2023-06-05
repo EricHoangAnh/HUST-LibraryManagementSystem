@@ -7,19 +7,15 @@ const DocumentSchema = mongoose.Schema({
   },
   documentTypeId: {
     type: String,
-    required: true,
+    required: false,
   },
   name: {
-    type: String,
-    required: true,
-  },
-  image: {
     type: String,
     required: false,
   },
   author: {
     type: String,
-    required: true,
+    required: false,
   },
   file: {
     type: Object,

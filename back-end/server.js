@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 // const fs = require("fs");
 // const multer = require("multer");
+const bodyParser = require('body-parser');
 const documentRouter = require("./routes/documentRoutes");
 const studentRouter = require("./routes/studentRoutes");
 const fileRouter = require("./routes/filesRoutes")
@@ -12,16 +13,16 @@ const {connectDatabase} = require("./service/db");
 app.get("/", (req, res) => {
   res.send("Hello");
 });
-app.use(express.json());
+// app.use(express.json());
 app.use(cors());
-//to parse json content
-app.use(express.json());
 //to parse body from url
-app.use(
-  express.urlencoded({
-    extended: false,
-  })
-);
+app.use(bodyParser.json({ limit: '100mb' }));
+app.use(bodyParser.urlencoded({ limit: '100mb', extended: true }));
+// app.use(
+//   express.urlencoded({
+//     extended: false,
+//   })
+// );
 // app.post("/upload", upload.single("file"), (req, res) => {
 //   res.status(200).send("File uploaded successfully");
 // });

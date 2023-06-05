@@ -7,16 +7,23 @@ import {
   UploadInstance,
   UploadRawFile,
   genFileId,
+ElNotification,
 } from "element-plus";
 import { IDocument } from "../../../common/model";
+import axiosClient from "../../../common/api/axiosClient"
 
 // const file = ref();
-const fileList = ref<string[]>([]);
+const fileList = ref<any[]>([]);
 const upload = ref<UploadInstance>();
+const imageUpload = ref<UploadInstance>();
+const fileUpload = ref<UploadInstance>()
+
 const file = ref<any>(null);
 const allStudents = computed(() => store.state.students)
 const allDocuments = computed(() => store.state.documents)
-const document = ref<IDocument>();
+const documentFormRef = ref();
+
+const loading = ref<boolean>(false)
 
 const form = reactive<IDocument>({
   documentCode: "",
@@ -28,10 +35,10 @@ const form = reactive<IDocument>({
   photo: "",
 });
 const handleExceed: UploadProps["onExceed"] = (files) => {
-  upload.value!.clearFiles();
+  imageUpload.value!.clearFiles();
   const file = files[0] as UploadRawFile;
   file.uid = genFileId();
-  upload.value!.handleStart(file);
+  imageUpload.value!.handleStart(file);
 };
 const onFileChange = (uploadFile: UploadFile) => {
   let fileType: string;
@@ -43,17 +50,17 @@ const onFileChange = (uploadFile: UploadFile) => {
   reader.onload = () => {
     form.photo = reader.result;
     fileType = reader.result.split(";")[0].split(":")[1];
-    
+
   };
   reader.readAsDataURL(file.value);
 };
-const submitForm = () => {
-  // Do something with the form data
-  console.log(form);
-};
 
-const handleFileChange = (fileList: any) => {
-  form.file = fileList[0];
+const handleFileChange = (file: any, fileList: any) => {
+
+// Gán file vào ref fileUpload
+  fileUpload.value = file;
+  form.file = file
+  console.log(fileUpload.value)
 };
 
 const beforeFileUpload = (file: any) => {
@@ -62,17 +69,43 @@ const beforeFileUpload = (file: any) => {
   console.log("Before file upload:", file);
 };
 
-const handlePhotoChange = (fileList: any) => {
-  form.photo = fileList[0];
-};
 
-const beforePhotoUpload = (file: any) => {
-  // Validate photo before uploading
-  // Return false to cancel upload if necessary
-  console.log("Before photo upload:", file);
-};
-const handleSubmit = () => {
+const handleSubmit = async () => {
+  loading.value = true
   console.log(form)
+  const formData = new FormData()
+  formData.append('file', form.file)
+
+  console.log(formData)
+
+  await axiosClient.post('document', formData).then((res) => {
+   if(res) {
+    documentFormRef.value.resetFields()
+    imageUpload.value?.clearFiles()
+     ElNotification({
+       title: 'Thành công',
+       message: 'Tải tài liệu lên thành công',
+       type: 'success',
+     })
+
+   }
+   else {
+    ElNotification({
+       title: 'Thất bại',
+       message: 'Tải tài liệu lên thất bại, hãy thử lại',
+       type: 'error',
+     })
+   }
+ }).catch((err) => {
+  console.log(err)
+  ElNotification({
+       title: 'Thất bại',
+       message: 'Tải tài liệu lên server thất bại, hãy kiểm tra lại',
+       type: 'error',
+     })
+ })
+
+  loading.value = false
 }
 </script>
 <template>
@@ -80,77 +113,67 @@ const handleSubmit = () => {
     <h2>Document Form</h2>
     <div class="container">
       <el-form
+        ref="documentFormRef"
+        v-loading="loading"
         :model="form"
-        @submit.native.prevent="submitForm"
-        class="d-flex flex-column"
-      >
-        <label class="form-label">Document Code</label>
-        <el-form-item>
+        @submit.prevent
+        class="d-flex flex-column">
+        <label class="form-label">Mã tài liệu</label>
+        <el-form-item prop="documentCode">
           <el-input v-model="form.documentCode"></el-input>
         </el-form-item>
-        <label class="form-label">Document Type ID</label>
+        <label class="form-label">Thể loại</label>
         <el-form-item prop="documentTypeId">
           <el-input v-model="form.documentTypeId" required></el-input>
         </el-form-item>
-        <label class="form-label">Name</label>
+        <label class="form-label">Tên tài liệu</label>
         <el-form-item prop="name">
           <el-input v-model="form.name" required></el-input>
         </el-form-item>
-        <label class="form-label">Author</label>
+        <label class="form-label">Tác giả</label>
         <el-form-item prop="author">
           <el-input v-model="form.author" required></el-input>
         </el-form-item>
         <label class="form-label">File</label>
-        <el-form-item>
+        <el-form-item prop="file">
           <el-upload
+            ref="fileUpload"
             class="upload-demo"
-            action="/upload"
+            :name="'file'"
+            :limit="1"
+            :accept="'.pdf'"
             :on-change="handleFileChange"
-            :before-upload="beforeFileUpload"
-            multiple
-            drag
-          >
+            :auto-upload="false"
+            single
+            drag>
             <i class="el-icon-upload"></i>
             <div class="el-upload__text">
-              Drop file here or <em>click to upload</em>
+              Kéo thả file vào đây hoặc <em>click để tải tệp lên</em>
             </div>
           </el-upload>
         </el-form-item>
-        <label class="form-label">Description</label>
-        <el-form-item>
+        <label class="form-label">Mô tả</label>
+        <el-form-item prop="description">
           <el-input type="textarea" v-model="form.description"></el-input>
         </el-form-item>
-        <label class="form-label">Photo</label>
-        <el-form-item>
+        <label class="form-label">Ảnh bìa</label>
+        <el-form-item prop="photo">
           <el-upload
-            class="upload-demo"
-            action="/upload"
-            :on-change="handlePhotoChange"
-            :before-upload="beforePhotoUpload"
-            drag
-          >
-            <i class="el-icon-upload"></i>
-            <div class="el-upload__text">
-              Drop photo here or <em>click to upload</em>
-            </div>
-          </el-upload>
-        </el-form-item>
-        <label>Ảnh nè</label>
-        <el-form-item>
-          <el-upload
-            ref="upload"
+            ref="imageUpload"
             class="upload"
             :limit="1"
             :on-exceed="handleExceed"
             :auto-upload="false"
             list-type="picture-card"
             @change="onFileChange"
-            accept="image/jpeg"
-          >
+            accept="image/jpeg">
+            <i class="el-icon-upload"></i>
           </el-upload>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" native-type="submit" @click="handleSubmit">Submit</el-button>
+          <el-button type="primary" native-type="submit" @click="handleSubmit"
+            >Submit</el-button
+          >
         </el-form-item>
       </el-form>
     </div>
