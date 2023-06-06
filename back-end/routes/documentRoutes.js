@@ -16,4 +16,10 @@ router
   .route("/document/:id")
   .put(upload.single("file"), documentController.updateDocument)
   .delete(documentController.deleteDocument);
+
+router
+  .route("/upload")
+  .post(upload.single("file"), documentController.uploadedFile);
+
+  router.route("/download/:fileId").get(documentController.downloadFile);
 module.exports = router;

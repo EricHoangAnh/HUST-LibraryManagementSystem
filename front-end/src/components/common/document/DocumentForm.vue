@@ -42,7 +42,6 @@ const handleExceed: UploadProps["onExceed"] = (files) => {
 };
 const onFileChange = (uploadFile: UploadFile) => {
   let fileType: string;
-  let imgData: string;
   if (uploadFile) {
     file.value = uploadFile.raw;
   }
@@ -58,9 +57,8 @@ const onFileChange = (uploadFile: UploadFile) => {
 const handleFileChange = (file: any, fileList: any) => {
 
 // Gán file vào ref fileUpload
-  fileUpload.value = file;
-  form.file = file
-  console.log(fileUpload.value)
+  // form.file = file.raw
+  // console.log(form.file)
 };
 
 const beforeFileUpload = (file: any) => {
@@ -69,19 +67,19 @@ const beforeFileUpload = (file: any) => {
   console.log("Before file upload:", file);
 };
 
+const handleFileSuccess = (res: any, file: any) => {
+  console.log("Success: ", file)
+}
+
 
 const handleSubmit = async () => {
   loading.value = true
   console.log(form)
-  const formData = new FormData()
-  formData.append('file', form.file)
-
-  console.log(formData)
-
-  await axiosClient.post('document', formData).then((res) => {
+  await axiosClient.post('document', form).then((res) => {
    if(res) {
     documentFormRef.value.resetFields()
     imageUpload.value?.clearFiles()
+    fileUpload.value?.clearFiles()
      ElNotification({
        title: 'Thành công',
        message: 'Tải tài liệu lên thành công',
@@ -142,8 +140,9 @@ const handleSubmit = async () => {
             :name="'file'"
             :limit="1"
             :accept="'.pdf'"
-            :on-change="handleFileChange"
-            :auto-upload="false"
+            :on-change="handleFileChange"           
+            action="http://localhost:8000/upload"
+            :on-success="handleFileSuccess"
             single
             drag>
             <i class="el-icon-upload"></i>

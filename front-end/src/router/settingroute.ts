@@ -1,5 +1,16 @@
 import { defineAsyncComponent, markRaw } from "vue";
 export const RouteMap = {
+  documentList: {
+    pageValue: "document-list",
+    pageName: "documentList",
+    component: markRaw(
+      defineAsyncComponent(
+        () => import("../components/common/document/DocumentList.vue")
+      )
+    ),
+    refresh: false,
+  },
+  
   search: {
     pageValue: "search",
     pageName: "search",

@@ -1,13 +1,19 @@
 const path = require("path");
 const fs = require("fs");
+const mongoose = require("mongoose");
 const Document = require("../model/documentModel");
 const { getBucket } = require("../service/db");
+const Grid = require('gridfs-stream');
+
+const uri =
+  "mongodb+srv://hoang7301:vietxungg73@library-system.dcwhpui.mongodb.net/library-system?retryWrites=true&w=majority";
 
 let isSameFile;
+let uploadedFile;
 const isSameCurrentFile = async (fileId, req, res) => {
   const bucket = getBucket();
   const currentFile = await bucket.find({ _id: fileId });
-  console.log(currentFile)
+  console.log(currentFile);
   const filename = req.file.filename;
   const chunkSize = req.file.chunkSize;
   const size = req.file.size;
@@ -49,20 +55,21 @@ exports.createDocument = async (req, res) => {
     res.status(400).send({ message: "Request is empty !!!" });
     return;
   }
-  console.log(req.file)
   try {
+    console.log(uploadedFile);
     // Tạo một bản ghi mới với thông tin document và fileId
     const newDocument = new Document({
       documentCode: req.body.documentCode,
       documentTypeId: req.body.documentTypeId,
       name: req.body.name,
+      file: uploadedFile,
       author: req.body.author,
-      file: req.file,
       description: req.body.description,
       photo: req.body.photo,
     });
 
     await newDocument.save();
+    console.log("Đã tải file lên mongoDB");
 
     res.status(200).send("Tạo document và tải lên file thành công");
   } catch (err) {
@@ -79,9 +86,13 @@ exports.updateDocument = async (req, res) => {
   const id = req.params.id;
   const fileId = req.file.id;
   try {
-    console.log(fileId)
+    console.log(fileId);
     await isSameCurrentFile(fileId, req, res);
-    Document.findByIdAndUpdate(id, {...req.body, file: req.file}, { new: true }).then((data) => {
+    Document.findByIdAndUpdate(
+      id,
+      { ...req.body, file: req.file },
+      { new: true }
+    ).then((data) => {
       if (!data) {
         res.status(404).send({
           message: `Cannot find document with id ${id} !!!`,
@@ -126,13 +137,28 @@ exports.getIsSameFile = () => {
   return isSameFile;
 };
 
-const downloadFile = async (req, res) => {
-  const id = req.body.id;
-  const document = await Document.findById(id);
-  if (!document) {
-    console.log("No document found!");
+exports.uploadedFile = (req, res) => {
+  uploadedFile = req.file;
+  console.log(uploadedFile);
+  res.status(200).send("Tải lên file thành công");
+};
+
+exports.downloadFile = async (req, res) => {
+  const bucket = await getBucket();
+  const fileId = req.params.fileId;
+  try {
+    const downloadStream = bucket.openDownloadStream(new mongoose.Types.ObjectId(fileId));
+
+    // Thiết lập các header để trình duyệt nhận biết và tải xuống file PDF
+    res.set({
+      'Content-Type': 'application/pdf', 
+      'Content-Disposition': `attachment; filename="${fileId}"`,
+    });
+
+    // Đọc dữ liệu từ stream và gửi về trình duyệt
+    downloadStream.pipe(res);
+
+  } catch (error) {
+    console.log(error);
   }
-  const file = item.file;
-  const filePath = path.join(__dirname, `../${file}`);
-  res.download(filePath);
 };
