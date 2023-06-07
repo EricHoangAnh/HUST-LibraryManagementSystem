@@ -3,7 +3,7 @@ const fs = require("fs");
 const mongoose = require("mongoose");
 const Document = require("../model/documentModel");
 const { getBucket } = require("../service/db");
-const Grid = require('gridfs-stream');
+const Grid = require("gridfs-stream");
 
 const uri =
   "mongodb+srv://hoang7301:vietxungg73@library-system.dcwhpui.mongodb.net/library-system?retryWrites=true&w=majority";
@@ -47,6 +47,23 @@ exports.getAllDocuments = async (req, res) => {
       console.log(err);
       res.status(500).send({ message: err || "Fail to get all documents !!!" });
     });
+};
+exports.getDocumentById = async (req, res) => {
+  const documentId = ObjectId(req.params.id);
+  try {
+    const document = await Document.findById(documentId); // Tìm document trong MongoDB theo ID
+
+    if (!document) {
+      // Nếu không tìm thấy document, trả về lỗi hoặc thông báo không tìm thấy
+      return res.status(404).json({ message: "Document not found" });
+    }
+
+    // Nếu tìm thấy document, trả về document đã tìm thấy
+    res.json(document);
+  } catch (error) {
+    // Xử lý lỗi trong quá trình tìm kiếm document
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 // Add a new document
@@ -147,17 +164,18 @@ exports.downloadFile = async (req, res) => {
   const bucket = await getBucket();
   const fileId = req.params.fileId;
   try {
-    const downloadStream = bucket.openDownloadStream(new mongoose.Types.ObjectId(fileId));
+    const downloadStream = bucket.openDownloadStream(
+      new mongoose.Types.ObjectId(fileId)
+    );
 
     // Thiết lập các header để trình duyệt nhận biết và tải xuống file PDF
     res.set({
-      'Content-Type': 'application/pdf', 
-      'Content-Disposition': `attachment; filename="${fileId}"`,
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="${fileId}"`,
     });
 
     // Đọc dữ liệu từ stream và gửi về trình duyệt
     downloadStream.pipe(res);
-
   } catch (error) {
     console.log(error);
   }

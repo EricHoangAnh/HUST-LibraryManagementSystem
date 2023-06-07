@@ -4,9 +4,21 @@ import { IDocument } from '@/common/model';
 import store from '@/store';
 import { ElNotification } from 'element-plus';
 import { ref, computed, onMounted } from 'vue';
+import DocumentDetail from './DocumentDetail.vue'
 
+
+const documentDetailRef = ref()
+const isVisible = ref<boolean>(false)
 const allDocuments = computed<IDocument[]>(() => store.state.documents)
+const documentData = ref<IDocument>()
+const loading = ref<boolean>(false)
 
+const getDocumentById = async (doc: IDocument) => {
+  documentData.value = allDocuments.value.find((document: IDocument) => document._id === doc._id)
+  isVisible.value = true
+  documentDetailRef.value?.showFormDialog(documentData.value)
+
+}
 const downloadFile = async (fileId: any, filename: any) => {
 await axiosClient.get(`/download/${fileId}`, {responseType: 'arraybuffer'}).then((res: any) => {
   if(res) {
@@ -18,11 +30,6 @@ await axiosClient.get(`/download/${fileId}`, {responseType: 'arraybuffer'}).then
           link.setAttribute('download', filename); // Thay thế bằng tên file và đuôi mở rộng tương ứng
           document.body.appendChild(link);
           link.click();
-    ElNotification({
-       title: 'Thành công',
-       message: 'Tải xuống tài liêu thành công',
-       type: 'success',
-     })
   }
   else {
     ElNotification({
@@ -46,6 +53,7 @@ onMounted(async () => {
 </script>
 <template>
   <div class="container my-5">
+    <document-detail ref="documentDetailRef"></document-detail>
     <template v-for="(document, i) in allDocuments">
       <div class="row justify-content-center mb-3">
         <div class="col-md-12 col-xl-10">
@@ -77,7 +85,10 @@ onMounted(async () => {
                 <div
                   class="col-md-6 col-lg-3 col-xl-3 border-sm-start-none border-start d-flex flex-column justify-content-center">
                   <div class="d-flex flex-column">
-                    <button class="btn btn-primary btn-sm" type="button">
+                    <button
+                      class="btn btn-primary btn-sm"
+                      type="button"
+                      @click="getDocumentById(document)">
                       Thông tin chi tiết
                     </button>
                     <button

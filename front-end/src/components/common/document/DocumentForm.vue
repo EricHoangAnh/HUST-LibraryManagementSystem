@@ -165,7 +165,7 @@ const handleSubmit = async () => {
             :auto-upload="false"
             list-type="picture-card"
             @change="onFileChange"
-            accept="image/jpeg">
+            accept="image/jpeg/png">
             <i class="el-icon-upload"></i>
           </el-upload>
         </el-form-item>

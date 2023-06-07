@@ -3,11 +3,12 @@ export interface IAccount {
   password: string;
 }
 export interface IDocument {
-  name?: string
-  documentCode?: string | number
-  documentTypeId?: string | number
-  photo?: any
-  author?: string
-  file?: any
-  description?: string
+  _id?: string;
+  name?: string;
+  documentCode?: string | number;
+  documentTypeId?: string | number;
+  photo?: any;
+  author?: string;
+  file?: any;
+  description?: string;
 }
