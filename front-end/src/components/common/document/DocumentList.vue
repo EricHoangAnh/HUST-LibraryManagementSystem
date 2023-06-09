@@ -5,18 +5,26 @@ import store from '@/store';
 import { ElNotification } from 'element-plus';
 import { ref, computed, onMounted } from 'vue';
 import DocumentDetail from './DocumentDetail.vue'
+import DocumentForm from './DocumentForm.vue';
 
 
 const documentDetailRef = ref()
 const isVisible = ref<boolean>(false)
 const allDocuments = computed<IDocument[]>(() => store.state.documents)
 const documentData = ref<IDocument>()
+const documentFormRef = ref()
 const loading = ref<boolean>(false)
 
 const getDocumentById = async (doc: IDocument) => {
   documentData.value = allDocuments.value.find((document: IDocument) => document._id === doc._id)
   isVisible.value = true
   documentDetailRef.value?.showFormDialog(documentData.value)
+
+}
+const editDocumentById = async (doc: IDocument) => {
+  documentData.value = allDocuments.value.find((document: IDocument) => document._id === doc._id)
+  isVisible.value = true
+  documentFormRef.value?.showFormDialog(documentData.value)
 
 }
 const downloadFile = async (fileId: any, filename: any) => {
@@ -27,7 +35,7 @@ await axiosClient.get(`/download/${fileId}`, {responseType: 'arraybuffer'}).then
         const url = window.URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = url;
-          link.setAttribute('download', filename); // Thay thế bằng tên file và đuôi mở rộng tương ứng
+          link.setAttribute('download', `${filename}.pdf`); // Thay thế bằng tên file và đuôi mở rộng tương ứng
           document.body.appendChild(link);
           link.click();
   }
@@ -54,6 +62,7 @@ onMounted(async () => {
 <template>
   <div class="container my-5">
     <document-detail ref="documentDetailRef"></document-detail>
+    <document-form ref="documentFormRef"></document-form>
     <template v-for="(document, i) in allDocuments">
       <div class="row justify-content-center mb-3">
         <div class="col-md-12 col-xl-10">
@@ -74,27 +83,52 @@ onMounted(async () => {
                   </div>
                 </div>
                 <div class="col-md-6 col-lg-6 col-xl-6">
-                  <h5 class="fw-bold">{{ document.name }}</h5>
-                  <p class="description mb-4 mb-md-0 fst-italic col-8">
-                    There are many variations of passages of Lorem Ipsum
+                  <h5 class="fw-bold">{{`[${document.documentCode}]  ` + document.name }}</h5>
+                  <p class="description mb-4 mb-md-0 fst-italic">
+                    <!-- There are many variations of passages of Lorem Ipsum
                     available, but the majority have suffered alteration in some
                     form, by injected humour, or randomised words which don't
-                    look even slightly believable.
+                    look even slightly believable. -->
+                    {{ document.description }}
                   </p>
                 </div>
                 <div
                   class="col-md-6 col-lg-3 col-xl-3 border-sm-start-none border-start d-flex flex-column justify-content-center">
                   <div class="d-flex flex-column">
                     <button
-                      class="btn btn-primary btn-sm"
+                      class="btn btn-outline-primary btn-sm"
                       type="button"
                       @click="getDocumentById(document)">
-                      Thông tin chi tiết
+                      <i class="fa-solid fa-circle-info"></i>
+                      Thông tin
+                    </button>
+                    <button
+                      class="btn btn-primary btn-sm mt-2"
+                      type="button"
+                      @click="">
+                      <i class="fa-solid fa-heart"></i>
+                      Đã thích
                     </button>
                     <button
                       class="btn btn-outline-primary btn-sm mt-2"
                       type="button"
-                      @click="downloadFile(document?.file?.id, document?.file?.filename)">
+                      @click="">
+                      <i class="fa-regular fa-heart"></i>
+                      Yêu thích
+                    </button>
+                    <button
+                      class="btn btn-primary btn-sm mt-2"
+                      type="button"
+                      @click="editDocumentById(document)">
+                      <i class="fa-sharp fa-solid fa-file-pen"></i>
+                      Chỉnh sửa
+                    </button>
+                    <button
+                      v-if="document?.file"
+                      class="btn btn-outline-primary btn-sm mt-2"
+                      type="button"
+                      @click="downloadFile(document?.file?.id, document?.name)">
+                      <i class="fa-sharp fa-solid fa-file-arrow-down"></i>
                       Tải xuống
                     </button>
                   </div>

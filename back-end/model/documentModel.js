@@ -6,7 +6,7 @@ const DocumentSchema = mongoose.Schema({
     required: false,
   },
   documentTypeId: {
-    type: String,
+    type: mongoose.Types.ObjectId,
     required: false,
   },
   name: {
@@ -29,6 +29,14 @@ const DocumentSchema = mongoose.Schema({
     type: String,
     required: false,
   },
+  isFavourited: {
+    type: Boolean,
+    required: false
+  },
+  favouriteQuantity: {
+    type: Number,
+    required: false
+  }
 });
 
 const Document = mongoose.model("Document", DocumentSchema);

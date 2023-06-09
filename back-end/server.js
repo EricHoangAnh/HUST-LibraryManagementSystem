@@ -3,6 +3,7 @@ const cors = require("cors");
 const bodyParser = require('body-parser');
 const documentRouter = require("./routes/documentRoutes");
 const studentRouter = require("./routes/studentRoutes");
+const userRouter = require("./routes/userRoutes")
 const app = express();
 const port = 8000;
 const {connectDatabase} = require("./service/db");
@@ -18,6 +19,7 @@ app.use(bodyParser.urlencoded({ limit: '100mb', extended: true }));
 
 app.use("/", documentRouter);
 app.use("/", studentRouter);
+app.use("/", userRouter);
 app.listen(port, async () => {
   await connectDatabase();
   console.log(`App is running on port ${port}!`);

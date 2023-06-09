@@ -9,13 +9,17 @@ const StudentSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  email: {
+  gender: {
     type: String,
     required: true,
   },
+  email: {
+    type: String,
+    required: false,
+  },
   phone: {
     type: String,
-    required: true,
+    required: false,
   },
   address: {
     type: String,

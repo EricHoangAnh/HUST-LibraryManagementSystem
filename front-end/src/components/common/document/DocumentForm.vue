@@ -12,7 +12,7 @@ ElNotification,
 import { IDocument } from "../../../common/model";
 import axiosClient from "../../../common/api/axiosClient"
 
-// const file = ref();
+const drawerRef = ref<boolean>(false);
 const fileList = ref<any[]>([]);
 const upload = ref<UploadInstance>();
 const imageUpload = ref<UploadInstance>();
@@ -34,6 +34,19 @@ const form = reactive<IDocument>({
   description: "",
   photo: "",
 });
+
+const showFormDialog = (item: IDocument) => {
+  console.log(item)
+  form.documentCode = item.documentCode
+  form.documentTypeId = item.documentTypeId
+  form.name = item.name
+  form.author = item.author
+  form.description = item.description
+  form.file = item.file
+  form.photo = item.photo
+  drawerRef.value = true
+
+}
 const handleExceed: UploadProps["onExceed"] = (files) => {
   imageUpload.value!.clearFiles();
   const file = files[0] as UploadRawFile;
@@ -80,6 +93,7 @@ const handleSubmit = async () => {
     documentFormRef.value.resetFields()
     imageUpload.value?.clearFiles()
     fileUpload.value?.clearFiles()
+    drawerRef.value = false
      ElNotification({
        title: 'Thành công',
        message: 'Tải tài liệu lên thành công',
@@ -105,11 +119,19 @@ const handleSubmit = async () => {
 
   loading.value = false
 }
+
+defineExpose({
+  showFormDialog
+})
 </script>
 <template>
-  <div>
+  <el-drawer v-model="drawerRef"
+    modal-class="sp-bootstrap"
+    :size="'40%'"
+    :close-on-click-modal="false">
     <h2>Document Form</h2>
     <div class="container">
+      
       <el-form
         ref="documentFormRef"
         v-loading="loading"
@@ -176,7 +198,7 @@ const handleSubmit = async () => {
         </el-form-item>
       </el-form>
     </div>
-  </div>
+  </el-drawer>
 </template>
 <style scoped lang="scss">
 .container {

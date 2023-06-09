@@ -14,7 +14,7 @@ router
 
 router
   .route("/document/:id")
-  .get(documentController.getDocumentById)
+  .get(documentController.getDocumentById) 
   .put(upload.single("file"), documentController.updateDocument)
   .delete(documentController.deleteDocument);
 
