@@ -84,7 +84,7 @@ documentFormRef.value?.showFormDialog({})
     z-index: 1;
     top: 0;
   background: white;
-
+border-bottom: 1px solid #ccc;
 }
 .nav-item {
   cursor: pointer;

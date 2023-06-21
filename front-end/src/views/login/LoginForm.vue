@@ -29,7 +29,7 @@ async function onSubmitLogin() {
           ElNotification({
             title: 'Thất bại',
             message: err,
-            type: 'error',
+            type: 'error'
         })
       }) 
   }

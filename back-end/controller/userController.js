@@ -1,5 +1,6 @@
 const User = require("../model/userModel");
 const jwt = require("jsonwebtoken");
+const { default: mongoose } = require("mongoose");
 
 exports.createUser = (req, res) => {
   if (!req.body) {
@@ -16,6 +17,7 @@ exports.createUser = (req, res) => {
       email: req.body.email,
       phone: req.body.phone,
       address: req.body.address,
+      role: 'user'
     });
     user
       .save(user)
@@ -31,12 +33,15 @@ exports.createUser = (req, res) => {
 };
 exports.updateUser = (req, res) => {};
 
-exports.handleLogin = (req, res) => {
+exports.handleLogin = async (req, res) => {
   if (!req.body) {
     res.status(400).send({ message: "Request is empty !!!" });
     return;
   }
-  const user = User.find({ account: req.body.account, password: req.body.password });
+  const user = await User.findOne({
+    account: req.body.account,
+    password: req.body.password,
+  }).exec();
 
   if (!user) {
     return res.status(401).json({
@@ -44,6 +49,7 @@ exports.handleLogin = (req, res) => {
       error: "invalid credntials",
     });
   }
+  console.log("user: ", user);
   let token = jwt.sign({ userId: user._id }, "secretkey");
   return res.status(200).json({
     title: "login",
@@ -60,24 +66,18 @@ exports.getAllUsers = async (req, res) => {
       res.status(500).send({ message: err || "Fail to get all users !!!" });
     });
 };
-exports.getUser = async(req, res) => {
-    let token = req.headers.token
-    jwt.verify(token, 'secretkey', (err, decoded) => {
-        if(err) return res.status(401).json({
-            title: 'unauthorized'
-        })
-        console.log(decoded)
-        const user = User.findOne({_id: decoded.userId}).exec()
-        if(!user) {
-            return res.status(401).json({
-                title: 'unauthorized'
-            })
-        }
-        return res.status(200).json({
-            title:"User grabbed",
-            user: user
-        })
-
-    })
-
-}
+exports.getUser = async (req, res) => {
+  let token = req.headers.token;
+  const decoded = jwt.verify(token, "secretkey");
+  console.log("decoded: ", decoded);
+  const user = await User.findOne({ _id: decoded.userId }).exec();
+  if (!user) {
+    return res.status(401).json({
+      title: "unauthorized",
+    });
+  }
+  return res.status(200).json({
+    title: "User grabbed",
+    user: user,
+  });
+};

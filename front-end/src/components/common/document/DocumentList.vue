@@ -56,11 +56,13 @@ await axiosClient.get(`/download/${fileId}`, {responseType: 'arraybuffer'}).then
 }
 
 onMounted(async () => {
+  loading.value = true
   await store.dispatch("getDocuments")
+  loading.value = false
 })
 </script>
 <template>
-  <div class="container my-5">
+  <div v-loading="loading" class="container my-5">
     <document-detail ref="documentDetailRef"></document-detail>
     <document-form ref="documentFormRef"></document-form>
     <template v-for="(document, i) in allDocuments">
@@ -101,20 +103,6 @@ onMounted(async () => {
                       @click="getDocumentById(document)">
                       <i class="fa-solid fa-circle-info"></i>
                       Thông tin
-                    </button>
-                    <button
-                      class="btn btn-primary btn-sm mt-2"
-                      type="button"
-                      @click="">
-                      <i class="fa-solid fa-heart"></i>
-                      Đã thích
-                    </button>
-                    <button
-                      class="btn btn-outline-primary btn-sm mt-2"
-                      type="button"
-                      @click="">
-                      <i class="fa-regular fa-heart"></i>
-                      Yêu thích
                     </button>
                     <button
                       class="btn btn-primary btn-sm mt-2"

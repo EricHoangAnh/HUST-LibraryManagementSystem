@@ -15,7 +15,7 @@ const goToPage = (route: any) => {
 const router = computed(() => store.getters["getCurrentRouter"]);
 
 
-onMounted(async () => {
+onMounted(async () => {  
 await axiosClient.get('/user', {headers: {token: localStorage.getItem('token')}}).then((res) => {
   console.log(res)
 }).catch((err) => {

@@ -56,7 +56,7 @@ exports.getDocumentById = async (req, res) => {
     if (!document) {
       // Nếu không tìm thấy document, trả về lỗi hoặc thông báo không tìm thấy
       return res.status(404).json({ message: "Document not found" });
-    }
+    } 
 
     // Nếu tìm thấy document, trả về document đã tìm thấy
     res.json(document);

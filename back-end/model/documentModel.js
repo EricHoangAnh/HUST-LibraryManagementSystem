@@ -28,14 +28,6 @@ const DocumentSchema = mongoose.Schema({
   photo: {
     type: String,
     required: false,
-  },
-  isFavourited: {
-    type: Boolean,
-    required: false
-  },
-  favouriteQuantity: {
-    type: Number,
-    required: false
   }
 });
 
