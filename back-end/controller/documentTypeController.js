@@ -13,12 +13,12 @@ exports.getAllTypes = async (req, res) => {
 
 exports.createType = async (req, res) => {
   if (!req.body) {
-    res.status(400).send({ message: "Request is empty !!!" });
+    res.status(400).send({ message: "documentType is empty !!!" });
     return;
   }
   try {
     const type = new DocumentType({
-      typeTitle: req.body.typeTitle,
+      title: req.body.title,
       note: req.body.note,
     });
     type
@@ -36,7 +36,7 @@ exports.createType = async (req, res) => {
 
 exports.updateType = (req, res) => {
   if (!req.body) {
-    res.status(400).send({ message: "Request is empty !!!" });
+    res.status(400).send({ message: "documentType is empty !!!" });
     return;
   }
   const id = req.params.id;
@@ -56,4 +56,28 @@ exports.updateType = (req, res) => {
       message: err || `Fail to update type with id: ${id} !!!`,
     });
   }
+};
+// Delete a documentTyupe
+exports.deleteDocumentType = (req, res) => {
+  if (!req.body) {
+    res.status(400).send({ message: "documentTyupe is empty !!!" });
+    return;
+  }
+  const id = req.params.id;
+  DocumentType.findByIdAndDelete(id)
+    .then((data) => {
+      if (!data) { 
+        res.status(404).send({ message: `Cannot find documentType with id ${id}` });
+      } else {
+        res
+          .status(200)
+          .send({ message: "documentType has been delete successfully" });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).send({
+        message: err || `Fail to delete documentTyupe with id: ${id} !!!`,
+      });
+    });
 };

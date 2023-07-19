@@ -1,12 +1,24 @@
 <script setup lang="ts">
 import axiosClient from '@/common/api/axiosClient';
 import { IDocument } from '@/common/model';
+import store from '@/store';
 import { ElMessageBox, ElNotification } from 'element-plus';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import moment from 'moment';
 
 const drawerRef = ref()
 const loading = ref<boolean>(false)
 const documentModel = ref<IDocument>()
+const allTypes = computed(() => store.state.documentTypes)
+const allUsers = computed(() => store.state.users)
+
+
+const displayUser = computed<any>(() => {
+const data = allUsers.value.find((user: any) => user._id === documentModel.value?.userId )
+console.log(data)
+return data
+})
+
 
 
 const showFormDialog = (item: IDocument) => {
@@ -23,19 +35,25 @@ const handleClose = (done: () => void) => {
       // catch error
     })
 }
+
+const displayType = (typeId: any) => {
+  const type: any = allTypes.value.find((type: any) => type._id === typeId)
+  return type?.title
+}
+
 const downloadFile = async (fileId: any, filename: any) => {
-  // loading.value = true
+  loading.value = true
 await axiosClient.get(`/download/${fileId}`, {responseType: 'arraybuffer'}).then((res: any) => {
   if(res) {
     console.log(res)
-    // loading.value = false
+
     const blob = new Blob([res], { type: 'application/pdf' });
         const url = window.URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = url;
-          link.setAttribute('download', filename); // Thay thế bằng tên file và đuôi mở rộng tương ứng
-          document.body.appendChild(link);
-          link.click();
+          if(url) {
+          window.open(url, '_blank')?.focus()
+        }
   }
   else {
     ElNotification({
@@ -51,25 +69,30 @@ await axiosClient.get(`/download/${fileId}`, {responseType: 'arraybuffer'}).then
        type: 'error',
      })
 })
+  loading.value = false
 }
-
+onMounted(() => {
+  console.log(displayUser.value)
+})
 defineExpose({
   showFormDialog
 })
 </script>
 <template>
   <el-drawer
+    v-loading="loading"
     v-model="drawerRef"
     modal-class="sp-bootstrap"
     :size="'40%'"
     :close-on-click-modal="false">
-    <template #header>
-      <div class="campscomp-roomform-header">
-        <span class="campscomp-roomform-headertitle campsui-text-body"
-          >Thông tin tài liệu</span
-        >
+    <div>
+      <div>
+        <div class="campscomp-roomform-header mb-4">
+          <span class="campscomp-roomform-headertitle campsui-text-body"
+            >Thông tin tài liệu</span
+          >
+        </div>
       </div>
-    </template>
       <div class="campscomp-roomform">
         <div class="campscomp-roomform-container">
           <div class="campscomp-roomform-infoitem">
@@ -85,13 +108,60 @@ defineExpose({
           <div class="campscomp-roomform-infoitem">
             <div class="campscomp-infoitem-title">Thể loại</div>
             <div class="campscomp-infoitem-value">
-              {{ documentModel?.documentTypeId }}
+              {{ displayType(documentModel?.documentTypeId) }}
             </div>
           </div>
           <div class="campscomp-roomform-infoitem">
             <div class="campscomp-infoitem-title">Mô tả</div>
             <div class="campscomp-infoitem-value">
               {{ documentModel?.description }}
+            </div>
+          </div>
+          <div v-if="displayUser && displayUser?.role === 'user'" class="campscomp-roomform-infoitem">
+            <div class="campscomp-infoitem-title">Người đăng</div>
+            <div class="campscomp-infoitem-value d-flex align-items-center">
+              <img
+                v-if="displayUser.avatar"
+                :src="displayUser.avatar"
+                style="width: 30px; height: 30px; border-radius: 50%;" />
+              <img
+                v-else
+                src="../../../assets/image/blank.png"
+                style="width: 30px; height: 30px; border-radius: 50%;" />
+              <el-tooltip
+                effect="light"
+                :content="`<ul class='list-group list-group-flush rounded-3'>
+              <li class='list-group-item d-flex justify-content-between align-items-center p-3'>
+                   <i class='fa-solid fa-user'></i>
+                   <p class='mb-0'>${displayUser.gender === 'Male' ? 'Nam' : displayUser.gender === 'Female' ? 'Nữ': 'Khác'}</p>
+                 </li>
+                <li
+                  class='list-group-item d-flex justify-content-between align-items-center p-3'>
+                 <i class='fa-solid fa-at pe-3'></i>
+                   <p class='mb-0'>${ displayUser.email }</p>
+                 </li>
+                 <li
+                   class='list-group-item d-flex justify-content-between align-items-center p-3'>
+                   <i class='fa-solid fa-phone pe-3'></i>
+                   <p class='mb-0'>${displayUser.phone}</p>
+                 </li>
+                 <li
+                   class='list-group-item d-flex justify-content-between align-items-center p-3'>
+                  <i class='fa-solid fa-location-dot pe-3'></i>
+                   <p class='mb-0'>${ displayUser.address }</p>
+                </li>
+                 <li
+                  class='list-group-item d-flex justify-content-between align-items-center p-3'>
+                  <i class='fa-solid fa-cake-candles pe-3'></i>
+                  <p class='mb-0'>${moment(displayUser.dob).format('DD/MM/YYYY')}</p>
+                </li>
+
+              </ul>`"
+                raw-content>
+                <span class="campscomp-infoitem-value">
+                  {{ displayUser.account }}
+                </span>
+              </el-tooltip>
             </div>
           </div>
           <div class="campscomp-roomform-infoitem campscomp-roomform-photo">
@@ -106,13 +176,16 @@ defineExpose({
               <el-button
                 v-if="documentModel?.file"
                 type="primary"
+                link
+                :loading="loading"
                 @click="downloadFile(documentModel?.file?.id, documentModel?.name)"
-                >Tải xuống</el-button
+                ><i class="fa-solid fa-file-pdf me-2"></i>Xem trước</el-button
               >
             </div>
           </div>
         </div>
       </div>
+    </div>
   </el-drawer>
 </template>
 <style scoped lang="scss">

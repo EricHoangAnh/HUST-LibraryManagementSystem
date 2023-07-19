@@ -17,13 +17,30 @@ const loading = ref<boolean>(false)
 const users = computed(() => store.state.users)
 
 
+
 async function onSubmitLogin() {
-  const matchAccount = users.value.find((user: IUser) => user.account === loginUser.value.account && user.password === loginUser.value.password)
+  loading.value = true
+  await store.dispatch('getUsers')
+  const matchAccount: any = users.value.find((user: IUser) => user.account === loginUser.value.account && user.password === loginUser.value.password)
   if (matchAccount){
-        await axiosClient.post('/login', loginUser.value).then((res: any) => {
+        await axiosClient.post('/login', loginUser.value).then(async (res: any) => {
           console.log(res)
           localStorage.setItem('token', res.token)
-          router.push('/')
+          await store.commit("setLoginUser", matchAccount);
+          console.log(store.state.loginUser)
+          if(matchAccount?.role === 'admin') {
+            router.push('/dashboard')
+
+          }
+          else {
+            router.push('/')
+          }
+          ElNotification({
+       title: 'Đăng nhập thành công',
+       message: `Xin chào ${matchAccount.account}`,
+       type: 'success',
+       zIndex: 10
+     })
 
         }).catch((err) => {
           ElNotification({
@@ -31,7 +48,7 @@ async function onSubmitLogin() {
             message: err,
             type: 'error'
         })
-      }) 
+      })
   }
   else {
     ElNotification({
@@ -40,6 +57,7 @@ async function onSubmitLogin() {
        type: 'error',
      })
   }
+  loading.value = false
 }
 
 const onSubmitSignUp = async  () => {
@@ -75,7 +93,7 @@ const showLoginForm = () => {
 }
 
 onMounted(async () => {
-await store.dispatch('getUsers')
+
 });
 </script>
 <template>
@@ -111,11 +129,6 @@ await store.dispatch('getUsers')
             placeholder="Tên đăng nhập"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-input
-            v-model="signUpUser.userName"
-            placeholder="Tên người dùng"></el-input>
-        </el-form-item>
-        <el-form-item>
           <el-radio-group v-model="signUpUser.gender">
             <el-radio label="Male">Nam</el-radio>
             <el-radio label="Female">Nữ</el-radio>
@@ -126,7 +139,7 @@ await store.dispatch('getUsers')
           <el-date-picker
             v-model="signUpUser.dob"
             type="date"
-            placeholder="Pick a day"
+            placeholder="Nhập ngày sinh của bạn"
             size="large"
             class="w-100" />
         </el-form-item>
@@ -147,13 +160,15 @@ await store.dispatch('getUsers')
           <el-input
             v-model="signUpUser.password"
             type="password"
-            placeholder="Mật khẩu"></el-input>
+            placeholder="Mật khẩu"
+            show-password></el-input>
         </el-form-item>
         <el-form-item>
           <el-input
             v-model="passwordConfirm"
             type="password"
-            placeholder="Xác nhận mật khẩu"></el-input>
+            placeholder="Xác nhận mật khẩu"
+            show-password></el-input>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="onSubmitSignUp">Đăng ký</el-button>

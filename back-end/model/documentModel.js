@@ -6,7 +6,11 @@ const DocumentSchema = mongoose.Schema({
     required: false,
   },
   documentTypeId: {
-    type: mongoose.Types.ObjectId,
+    type: String,
+    required: false,
+  },
+  typeInfo: {
+    type: Object,
     required: false,
   },
   name: {
@@ -28,6 +32,38 @@ const DocumentSchema = mongoose.Schema({
   photo: {
     type: String,
     required: false,
+  },
+  photo: {
+    type: String,
+    required: false,
+  },
+  createdAt: {
+    type: String,
+    required: false,
+  },
+  lastUpdate: {
+    type: String,
+    required: false,
+  },
+  downloadQuantity: {
+    type: Number,
+    required: false,
+  },
+  userId: {
+    type: String,
+    required: false,
+  },
+  docId: {
+    type: String,
+    required: false,
+  },
+  status: {
+    type: Number,
+    required: false
+  },
+  reqId: {
+    type: String,
+    required: false
   }
 });
 

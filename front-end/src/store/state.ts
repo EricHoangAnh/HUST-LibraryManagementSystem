@@ -3,7 +3,11 @@ const state = {
   documents: [],
   documentTypes: [],
   routerHistory: [],
-  users:[]
+  routerAdminHistory: [],
+  userDocuments: [],
+  users:[],
+  requests:[],
+  loginUser:{},
 };
 
 export default state;

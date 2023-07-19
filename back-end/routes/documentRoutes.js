@@ -14,13 +14,21 @@ router
 
 router
   .route("/document/:id")
-  .get(documentController.getDocumentById) 
+  .get(documentController.getDocumentById)
   .put(upload.single("file"), documentController.updateDocument)
   .delete(documentController.deleteDocument);
+router
+  .route("/user-action-document")
+  .put(upload.single("file"), documentController.userUpdateDocument)
+  .delete(documentController.userDeleteDocument);
 
 router
   .route("/upload")
   .post(upload.single("file"), documentController.uploadedFile);
 
-  router.route("/download/:fileId").get(documentController.downloadFile);
+router
+  .route("/request-document")
+  .post(documentController.createDocumentFromRequest);
+
+router.route("/download/:fileId").get(documentController.downloadFile);
 module.exports = router;

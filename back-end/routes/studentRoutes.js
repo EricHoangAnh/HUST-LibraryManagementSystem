@@ -11,7 +11,7 @@ router
   .route("/student/:id")
   .put(studentController.updateStudent)
   .delete(studentController.deleteStudent);
-module.exports = router;
+module.exports = router;  
 
 
 

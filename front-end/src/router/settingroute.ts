@@ -10,6 +10,36 @@ export const RouteMap = {
     ),
     refresh: false,
   },
+  dashboard: {
+    pageValue: "dashboard",
+    pageName: "dashboard",
+    component: markRaw(
+      defineAsyncComponent(
+        () => import("../views/admin/dashboard/DashBoard.vue")
+      )
+    ),
+    refresh: false,
+  },
+  requestList: {
+    pageValue: "request-list",
+    pageName: "requestList",
+    component: markRaw(
+      defineAsyncComponent(
+        () => import("../views/admin/request-list/RequestList.vue")
+      )
+    ),
+    refresh: false,
+  },
+  documentType: {
+    pageValue: "document-type",
+    pageName: "documentType",
+    component: markRaw(
+      defineAsyncComponent(
+        () => import("../views/admin/document-type/DocumentType.vue")
+      )
+    ),
+    refresh: false,
+  },
   
   search: {
     pageValue: "search",
@@ -17,6 +47,16 @@ export const RouteMap = {
     component: markRaw(
       defineAsyncComponent(
         () => import("../components/common/search-center/SearchCenter.vue")
+      )
+    ),
+    refresh: true,
+  },
+  userManagement: {
+    pageValue: "user-management",
+    pageName: "userManagement",
+    component: markRaw(
+      defineAsyncComponent(
+        () => import("../views/admin/user/User.vue")
       )
     ),
     refresh: true,
@@ -41,4 +81,35 @@ export const RouteMap = {
     ),
     refresh: true,
   },
+  myRequest: {
+    pageValue: "my-request",
+    pageName: "myRequest",
+    component: markRaw(
+      defineAsyncComponent(
+        () => import("../views/users/my-request/MyRequest.vue")
+      )
+    ),
+    refresh: true,
+  },
+  myDocument: {
+    pageValue: "my-document",
+    pageName: "myDocument",
+    component: markRaw(
+      defineAsyncComponent(
+        () => import("../views/users/my-document/MyDocument.vue")
+      )
+    ),
+    refresh: true,
+  },
+  home: {
+    pageValue: "home",
+    pageName: "home",
+    component: markRaw(
+      defineAsyncComponent(
+        () => import("../views/users/home/DocumentHome.vue")
+      )
+    ),
+    refresh: true,
+  },
+
 };

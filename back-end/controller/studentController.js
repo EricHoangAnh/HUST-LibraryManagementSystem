@@ -6,7 +6,7 @@ const Student = require("../model/studentModel");
 exports.getAllStudents = async (req, res) => {
   await Student.find()
     .then((student) => {
-      res.send(student);
+      res.send(student); 
     })
     .catch((err) => {
       console.log(err);
@@ -42,11 +42,11 @@ exports.createStudent = (req, res) => {
 };
 
 // Update a student
-exports.updateStudent = (req, res) => {
+exports.updateStudent = (req, res) => { 
   if (!req.body) {
     res.status(400).send({ message: "Request is empty !!!" });
     return;
-  }
+  } 
   const id = req.params.id;
   try {
     Student.findByIdAndUpdate(id, req.body, { new: true }).then((data) => {

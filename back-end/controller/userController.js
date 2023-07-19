@@ -1,5 +1,6 @@
 const User = require("../model/userModel");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const { default: mongoose } = require("mongoose");
 
 exports.createUser = (req, res) => {
@@ -16,8 +17,8 @@ exports.createUser = (req, res) => {
       gender: req.body.gender,
       email: req.body.email,
       phone: req.body.phone,
-      address: req.body.address,
-      role: 'user'
+      address: req.body.address, 
+      role: "user",
     });
     user
       .save(user)
@@ -31,7 +32,29 @@ exports.createUser = (req, res) => {
     console.log(err);
   }
 };
-exports.updateUser = (req, res) => {};
+exports.updateUser = (req, res) => {
+  if (!req.body) {
+    res.status(400).send({ message: "Request is empty !!!" });
+    return;
+  }
+  const id = req.params.id;
+  try {
+    User.findByIdAndUpdate(id, req.body, { new: true }).then((data) => {
+      if (!data) {
+        res.status(404).send({
+          message: `Cannot find user with id ${id} !!!`,
+        });
+      } else {
+        res.status(200).send(data);
+      }
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({
+      message: err || `Fail to update user with id: ${id} !!!`,
+    });
+  }
+};
 
 exports.handleLogin = async (req, res) => {
   if (!req.body) {
@@ -46,14 +69,15 @@ exports.handleLogin = async (req, res) => {
   if (!user) {
     return res.status(401).json({
       title: "user or password incorrect",
-      error: "invalid credntials",
+      error: "invalid credntials", 
     });
   }
-  console.log("user: ", user);
+  console.log(user)
   let token = jwt.sign({ userId: user._id }, "secretkey");
-  return res.status(200).json({
+  return res.status(200).json({ 
     title: "login",
-    token: token,
+    token: token,   
+    user: user,
   });
 };
 exports.getAllUsers = async (req, res) => {
@@ -69,8 +93,10 @@ exports.getAllUsers = async (req, res) => {
 exports.getUser = async (req, res) => {
   let token = req.headers.token;
   const decoded = jwt.verify(token, "secretkey");
-  console.log("decoded: ", decoded);
-  const user = await User.findOne({ _id: decoded.userId }).exec();
+  console.log('decoded: ', decoded);
+  const user = await User.findOne({
+    _id: new mongoose.Types.ObjectId(decoded.userId),
+  }).exec();
   if (!user) {
     return res.status(401).json({
       title: "unauthorized",

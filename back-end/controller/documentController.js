@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const Document = require("../model/documentModel");
 const { getBucket } = require("../service/db");
 const Grid = require("gridfs-stream");
+const DocumentType = require("../model/documentTypeModel");
 
 const uri =
   "mongodb+srv://hoang7301:vietxungg73@library-system.dcwhpui.mongodb.net/library-system?retryWrites=true&w=majority";
@@ -41,6 +42,7 @@ const isSameCurrentFile = async (fileId, req, res) => {
 exports.getAllDocuments = async (req, res) => {
   await Document.find()
     .then((document) => {
+      // console.log(document)
       res.send(document);
     })
     .catch((err) => {
@@ -51,12 +53,12 @@ exports.getAllDocuments = async (req, res) => {
 exports.getDocumentById = async (req, res) => {
   const documentId = ObjectId(req.params.id);
   try {
-    const document = await Document.findById(documentId); // Tìm document trong MongoDB theo ID
+    const document = await Document.findById(documentId); // Tìm document trong MongoDB  theo ID
 
     if (!document) {
       // Nếu không tìm thấy document, trả về lỗi hoặc thông báo không tìm thấy
       return res.status(404).json({ message: "Document not found" });
-    } 
+    }
 
     // Nếu tìm thấy document, trả về document đã tìm thấy
     res.json(document);
@@ -83,6 +85,39 @@ exports.createDocument = async (req, res) => {
       author: req.body.author,
       description: req.body.description,
       photo: req.body.photo,
+      userId: req.body.userId,
+      createdAt: req.body.createdAt,
+      lastUpdated: req.body.lastUpdated,
+    });
+
+    await newDocument.save();
+    console.log("Đã tải file lên mongoDB");
+
+    res.status(200).send("Tạo document và tải lên file thành công");
+  } catch (err) {
+    console.log(err);
+  }
+};
+exports.createDocumentFromRequest = async (req, res) => {
+  if (!req.body) {
+    res.status(400).send({ message: "Request is empty !!!" });
+    return;
+  }
+  try {
+    // Tạo một bản ghi mới với thông tin document và fileId
+    const newDocument = new Document({
+      documentCode: req.body.documentCode,
+      documentTypeId: req.body.documentTypeId,
+      name: req.body.name,
+      file: req.body.file,
+      author: req.body.author,
+      description: req.body.description,
+      photo: req.body.photo,
+      userId: req.body.userId,
+      docId: req.body.docId,
+      reqId: req.body._id,
+      createdAt: req.body.createdAt,
+      lastUpdated: req.body.lastUpdated,
     });
 
     await newDocument.save();
@@ -101,13 +136,10 @@ exports.updateDocument = async (req, res) => {
     return;
   }
   const id = req.params.id;
-  const fileId = req.file.id;
   try {
-    console.log(fileId);
-    await isSameCurrentFile(fileId, req, res);
     Document.findByIdAndUpdate(
       id,
-      { ...req.body, file: req.file },
+      { ...req.body, file: uploadedFile ? uploadedFile : req.body.file },
       { new: true }
     ).then((data) => {
       if (!data) {
@@ -125,9 +157,50 @@ exports.updateDocument = async (req, res) => {
     });
   }
 };
+exports.userUpdateDocument = async (req, res) => {
+  if (!req.body) {
+    res.status(400).send({ message: "Request is empty !!!" });
+    return;
+  }
+  const filter = { docId: req.body.docId };
+  try {
+    console.log('req: ', req.body)
+    const data = await Document.findOneAndUpdate(
+      filter,
+      {
+        documentCode: req.body.documentCode,
+        documentTypeId: req.body.documentTypeId,
+        name: req.body.name,
+        file: uploadedFile ? uploadedFile: req.body.file,
+        author: req.body.author,
+        description: req.body.description,
+        photo: req.body.photo,
+        userId: req.body.userId,
+        docId: req.body.docId,
+        createdAt: req.body.createdAt,
+        lastUpdated: req.body.lastUpdated,
+      },
+      { new: true }
+    );
+    console.log(data);
+    await data.save();
+    if (!data) {
+      res.status(404).send({
+        message: `Cannot find document with id ${id} !!!`,
+      });
+    } else {
+      res.status(200).send(data);
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({
+      message: err || `Fail to update document with id: ${id} !!!`,
+    });
+  }
+};
 
 // Delete a document
-exports.deleteDocument = (req, res) => {
+exports.deleteDocument = async (req, res) => {
   if (!req.body) {
     res.status(400).send({ message: "Request is empty !!!" });
     return;
@@ -138,9 +211,7 @@ exports.deleteDocument = (req, res) => {
       if (!data) {
         res.status(404).send({ message: `Cannot find document with id ${id}` });
       } else {
-        res
-          .status(200)
-          .send({ message: "Document has been delete successfully" });
+        res.status(200).send(data);
       }
     })
     .catch((err) => {
@@ -149,6 +220,28 @@ exports.deleteDocument = (req, res) => {
         message: err || `Fail to delete document with id: ${id} !!!`,
       });
     });
+};
+exports.userDeleteDocument = async (req, res) => {
+  if (!req.body) {
+    res.status(400).send({ message: "Request is empty !!!" });
+    return;
+  }
+  const filter = { docId: req.body.docId };
+  try {
+    console.log('docId: ', req.body.docId) 
+    const data = await Document.findOneAndDelete(filter);
+    console.log(data)
+    if (!data) {
+      res.status(404).send({ message: `Cannot find document with id` });
+    } else {
+      res.status(200).send(data);
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({
+      message: err || `Fail to delete document with id: !!!`,
+    });
+  }
 };
 exports.getIsSameFile = () => {
   return isSameFile;

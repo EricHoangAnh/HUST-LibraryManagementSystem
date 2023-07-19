@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const DocumentTypeSchema = mongoose.Schema({
-  typeTitle: {
+  title: {
     type: String,
     required: true,
   },

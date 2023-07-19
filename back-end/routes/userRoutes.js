@@ -7,5 +7,6 @@ router.route("/login").post(userControler.handleLogin)
 
 router.route("/users").get(userControler.getAllUsers)
 router.route("/user").get(userControler.getUser)
+router.route("/user/:id").put(userControler.updateUser)
 
 module.exports = router;
