@@ -33,10 +33,6 @@ const DocumentSchema = mongoose.Schema({
     type: String,
     required: false,
   },
-  photo: {
-    type: String,
-    required: false,
-  },
   createdAt: {
     type: String,
     required: false,
